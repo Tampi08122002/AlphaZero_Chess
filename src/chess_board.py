@@ -43,6 +43,8 @@ class board():
         self.copy_board = None; self.en_passant_copy = None; self.r1_move_count_copy = None; self.r2_move_count_copy = None; 
         self.k_move_count_copy = None; self.R1_move_count_copy = None; self.R2_move_count_copy = None; self.K_move_count_copy = None
         self.player = 0 # current player's turn (0:white, 1:black)
+        self.captures_W=[]
+        self.captures_B=[]
         
     def move_rules_P(self,current_position):
         i, j = current_position
@@ -426,10 +428,25 @@ class board():
             a+=1;b-=1
         return next_positions
     
+    def move_rules_crazyhouse_W(self, piece):
+        board_state=self.current_board
+        next_positions=[]
+        if piece == "P" :
+            for i in range (1,7):
+                for j in range (0,8):
+                    if board_state[i,j]==" ":
+                        next_positions.append((i,j))
+        else:
+            for i in range (0,8):
+                for j in range (0,8):
+                    if board_state[i,j]==" ":
+                        next_positions.append((i,j))
+        return next_positions
+
     #does not include king, castling
     def possible_W_moves(self, threats=False):
         board_state = self.current_board
-        rooks = {}; knights = {}; bishops = {}; queens = {}; pawns = {};
+        rooks = {}; knights = {}; bishops = {}; queens = {}; pawns = {}; drops={};
         i,j = np.where(board_state=="R")
         for rook in zip(i,j):
             rooks[tuple(rook)] = self.move_rules_R(rook)
@@ -448,13 +465,15 @@ class board():
                 pawns[tuple(pawn)],_ = self.move_rules_P(pawn)
             else:
                 _,pawns[tuple(pawn)] = self.move_rules_P(pawn)
-        c_dict = {"R": rooks, "N": knights, "B": bishops, "Q": queens, "P": pawns}
+        for piece in self.captures_W:
+            drops[piece]=self.move_rules_crazyhouse_W(piece)
+        c_dict = {"R": rooks, "N": knights, "B": bishops, "Q": queens, "P": pawns, "D": drops}
         c_list = []
         c_list.extend(list(itertools.chain(*list(rooks.values())))); c_list.extend(list(itertools.chain(*list(knights.values())))); 
         c_list.extend(list(itertools.chain(*list(bishops.values())))); c_list.extend(list(itertools.chain(*list(queens.values()))))
-        c_list.extend(list(itertools.chain(*list(pawns.values()))))
+        c_list.extend(list(itertools.chain(*list(pawns.values())))); c_list.extend(list(itertools.chain(*list(drops.values()))))
         return c_list, c_dict
-        
+
     def move_rules_k(self):
         current_position = np.where(self.current_board=="k")
         i, j = current_position; i,j = i[0],j[0]
@@ -470,9 +489,24 @@ class board():
             next_positions.append((0,6))
         return next_positions
     
+    def move_rules_crazyhouse_B(self, piece):
+        board_state=self.current_board
+        next_positions=[]
+        if piece == "p" :
+            for i in range (1,7):
+                for j in range (0,8):
+                    if board_state[i,j]==" ":
+                        next_positions.append((i,j))
+        else:
+            for i in range (0,8):
+                for j in range (0,8):
+                    if board_state[i,j]==" ":
+                        next_positions.append((i,j))
+        return next_positions
+
         #does not include king, castling
     def possible_B_moves(self,threats=False):
-        rooks = {}; knights = {}; bishops = {}; queens = {}; pawns = {};
+        rooks = {}; knights = {}; bishops = {}; queens = {}; pawns = {}; drops={};
         board_state = self.current_board
         i,j = np.where(board_state=="r")
         for rook in zip(i,j):
@@ -492,11 +526,13 @@ class board():
                 pawns[tuple(pawn)],_ = self.move_rules_p(pawn)
             else:
                 _,pawns[tuple(pawn)] = self.move_rules_p(pawn)
-        c_dict = {"r": rooks, "n": knights, "b": bishops, "q": queens, "p": pawns}
+        for piece in self.captures_W:
+            drops[piece]=self.move_rules_crazyhouse_B(piece)
+        c_dict = {"r": rooks, "n": knights, "b": bishops, "q": queens, "p": pawns, "d": drops}
         c_list = []
         c_list.extend(list(itertools.chain(*list(rooks.values())))); c_list.extend(list(itertools.chain(*list(knights.values())))); 
         c_list.extend(list(itertools.chain(*list(bishops.values())))); c_list.extend(list(itertools.chain(*list(queens.values()))))
-        c_list.extend(list(itertools.chain(*list(pawns.values()))))
+        c_list.extend(list(itertools.chain(*list(pawns.values())))); c_list.extend(list(itertools.chain(*list(drops.values()))))
         return c_list, c_dict
         
     def move_rules_K(self):
@@ -521,6 +557,8 @@ class board():
             piece = self.current_board[i,j]
             self.current_board[i,j] = " "
             i, j = final_position
+            if self.current_board[i,j] !=  " ":
+                self.captures_W.append( self.current_board[i,j])
             if piece == "R" and initial_position == (7,0):
                 self.R1_move_count += 1
             if piece == "R" and initial_position == (7,7):
@@ -547,6 +585,8 @@ class board():
             piece = self.current_board[i,j]
             self.current_board[i,j] = " "
             i, j = final_position
+            if self.current_board[i,j] !=  " ":
+                self.captures_W.append( self.current_board[i,j])
             if piece == "r" and initial_position == (0,0):
                 self.r1_move_count += 1
             if piece == "r" and initial_position == (0,7):
