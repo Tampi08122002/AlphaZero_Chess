@@ -558,7 +558,16 @@ class board():
             self.current_board[i,j] = " "
             i, j = final_position
             if self.current_board[i,j] !=  " ":
-                self.captures_W.append( self.current_board[i,j])
+                if self.current_board[i,j] == "P":
+                    self.captures_W.append("p")
+                if self.current_board[i,j] == "Q":
+                    self.captures_W.append("q")
+                if self.current_board[i,j] == "N":
+                    self.captures_W.append("n")
+                if self.current_board[i,j] == "B":
+                    self.captures_W.append("b") 
+                if self.current_board[i,j]("R"):
+                    self.current_W.append("r")  
             if piece == "R" and initial_position == (7,0):
                 self.R1_move_count += 1
             if piece == "R" and initial_position == (7,7):
@@ -586,7 +595,16 @@ class board():
             self.current_board[i,j] = " "
             i, j = final_position
             if self.current_board[i,j] !=  " ":
-                self.captures_W.append( self.current_board[i,j])
+                if self.current_board[i,j] == "p":
+                    self.captures_W.append("P")
+                if self.current_board[i,j] == "q":
+                    self.captures_W.append("Q")
+                if self.current_board[i,j] == "n":
+                    self.captures_W.append("N")
+                if self.current_board[i,j] == "b":
+                    self.captures_W.append("B") 
+                if self.current_board[i,j]("r"):
+                    self.current_W.append("R")  
             if piece == "r" and initial_position == (0,0):
                 self.r1_move_count += 1
             if piece == "r" and initial_position == (0,7):
